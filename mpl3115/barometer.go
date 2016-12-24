@@ -36,10 +36,11 @@ type Baraometer struct {
 	i2c *i2c.Device
 }
 
-/*NewMPL3115 returns a new MPL3115 configures a barometer device*/
-func NewMPL3115(dev *i2c.Devfs) (*Baraometer, error) {
+/*NewBarometer returns a new MPL3115 configures a barometer device*/
+func NewBarometer(dev *i2c.Devfs) (*Baraometer, error) {
 	d, err := i2c.Open(dev, 0x60)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
@@ -61,6 +62,7 @@ func NewMPL3115(dev *i2c.Devfs) (*Baraometer, error) {
 	}
 	for _, rg := range cmds {
 		if err := m.i2c.WriteReg(rg.reg, []byte{rg.cmd}); err != nil {
+			fmt.Println("Failed reg", err)
 			return nil, err
 		}
 	}

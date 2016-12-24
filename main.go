@@ -26,7 +26,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/npotts/sensors/station"
+	"github.com/npotts/sensors/wxstation"
 	"os"
 	"time"
 )
@@ -34,6 +34,7 @@ import (
 func main() {
 	station, err := wxstation.NewStation("/dev/i2c-1")
 	if err != nil {
+		fmt.Println("Crap")
 		os.Exit(1)
 	}
 

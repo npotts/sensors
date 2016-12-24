@@ -32,6 +32,7 @@ package wxstation
 
 import (
 	"github.com/npotts/sensors/htu21d"
+	"github.com/npotts/sensors/mpl3115"
 	"golang.org/x/exp/io/i2c"
 	"math"
 )
@@ -55,30 +56,38 @@ func (m *Measurement) clear() {
 
 /*Station is a weather station*/
 type Station struct {
-	i2c *i2c.Devfs
-	rh  *htu21d.HTU21D
+	i2c  *i2c.Devfs
+	rh   *htu21d.HTU21D
+	baro *mpl3115.Baraometer
 }
 
 /*NewStation returns a intialited Station*/
 func NewStation(device string) (*Station, error) {
 	dev := &i2c.Devfs{Dev: device}
 	rh, err := htu21d.NewHTU21D(dev, false, false, true)
-	// rh, err := NewHTU21D(dev, false, false, true)
+	if err != nil {
+		return nil, err
+	}
+	bar, err := mpl3115.NewBarometer(dev)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Station{
-		i2c: dev,
-		rh:  rh,
+		i2c:  dev,
+		rh:   rh,
+		baro: bar,
 	}, nil
 }
 
 /*Measure returns some measurments from the hardware*/
 func (s *Station) Measure() (m Measurement, e error) {
 	m.clear()
-	if rh, err := s.rh.Measure(); err == nil {
-		m.Humidity, m.HumidityT, m.Dewpoint = rh.Humidity, rh.Temperature, rh.Dewpoint
+	// if rh, err := s.rh.Measure(); err == nil {
+	// 	m.Humidity, m.HumidityT, m.Dewpoint = rh.Humidity, rh.Temperature, rh.Dewpoint
+	// }
+	if baro, err := s.baro.Measure(); err == nil {
+		m.Pressure, m.PressT = baro.PressAlt, baro.Temperature
 	}
 	return
 }
